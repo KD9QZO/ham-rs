@@ -23,8 +23,7 @@
 // short ASCII strings (like "eor") within arbitrarily large byte streams that
 // may contain non-ASCII characters.  That in turn seems strange -- blame ADI.
 //
-pub fn byteseq_equal_ci(bytes: &Vec<u8>, s: &str) -> bool
-{
+pub fn byteseq_equal_ci(bytes: &Vec<u8>, s: &str) -> bool {
     //
     // Rather than bother checking the size, cloning "bytes", converting to a
     // string, and comparing the result case-insensitively, we'll just compare

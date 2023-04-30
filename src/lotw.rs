@@ -1,28 +1,28 @@
 use crate::Call;
 use chrono::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize,Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum LoTWStatus {
     Registered,
     Unregistered,
     LastUpload(DateTime<Utc>),
-    Unknown
+    Unknown,
 }
 
-#[derive(Debug, Serialize, Deserialize,Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum CertificateMeta {
     Callsign(String),
     Name(String),
     Email(String),
-    UnknownKeyValue((String,String)),
-    Unknown(String)
+    UnknownKeyValue((String, String)),
+    Unknown(String),
 }
 
-#[derive(Debug, Serialize, Deserialize,Clone,PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct LotwCertificate {
     call: Call,
     name: Option<String>,
-    email: Option<String>
+    email: Option<String>,
 }
 
 impl LotwCertificate {
@@ -57,19 +57,17 @@ impl LotwCertificate {
         self.email.clone()
     }
 }
-#[derive(Debug, Serialize, Deserialize,Clone,PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum Identity {
     Unknown,
-    ClientCertificate(LotwCertificate)
+    ClientCertificate(LotwCertificate),
 }
 
 impl Identity {
     pub fn call(&self) -> Option<Call> {
         match self {
             Identity::Unknown => None,
-            Identity::ClientCertificate(cert) => {
-                Some(cert.call().clone())
-            }
+            Identity::ClientCertificate(cert) => Some(cert.call().clone()),
         }
     }
 }

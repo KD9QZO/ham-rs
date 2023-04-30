@@ -1,6 +1,6 @@
 use crate::Call;
 
-#[derive(Debug, Serialize, Deserialize,Clone,PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum Country {
     Alaska,
     Andorra,
@@ -268,11 +268,11 @@ impl Country {
 }
 
 pub trait CountryInfo {
-    fn country(&self) -> Result<Country,&'static str>;
+    fn country(&self) -> Result<Country, &'static str>;
 }
 
 impl CountryInfo for Call {
-    fn country(&self) -> Result<Country,&'static str> {
+    fn country(&self) -> Result<Country, &'static str> {
         let prefix: Vec<char> = self.call().chars().take(2).collect();
 
         match prefix.as_slice() {
@@ -320,54 +320,52 @@ impl CountryInfo for Call {
             ['D', '5'] => Ok(Country::Liberia),
             ['D', '6'] => Ok(Country::Comoros),
             ['D', s] if s >= &'7' && s <= &'9' => Ok(Country::SouthKorea),
-            ['E',s] if s >= &'A' && s <= &'H' => Ok(Country::Spain),
-            ['E',s] if s >= &'I' && s <= &'J' => Ok(Country::Ireland),
-            ['E','K'] => Ok(Country::Armenia),
-            ['E','L'] => Ok(Country::Liberia),
-            ['E',s] if s >= &'M' && s <= &'O' => Ok(Country::Ukraine),
-            ['E',s] if s >= &'P' && s <= &'Q' => Ok(Country::Iran),
-            ['E','R'] => Ok(Country::Moldova),
-            ['E','S'] => Ok(Country::Estonia),
-            ['E','T'] => Ok(Country::Ethiopia),
-            ['E',s] if s >= &'U' && s <= &'W' => Ok(Country::Belarus),
-            ['E','X'] => Ok(Country::Kyrgyzstan),
-            ['E','Y'] => Ok(Country::Tajikistan),
-            ['E','Z'] => Ok(Country::Turkmenistan),
-            ['E','2'] => Ok(Country::Thailand),
-            ['E','3'] => Ok(Country::Eritrea),
-            ['E','4'] => Ok(Country::PalestinianAuthority),
-            ['E','5'] => Ok(Country::CookIslands),
-            ['E','6'] => Ok(Country::Niue),
-            ['E','7'] => Ok(Country::BosniaAndHerzegovina),
+            ['E', s] if s >= &'A' && s <= &'H' => Ok(Country::Spain),
+            ['E', s] if s >= &'I' && s <= &'J' => Ok(Country::Ireland),
+            ['E', 'K'] => Ok(Country::Armenia),
+            ['E', 'L'] => Ok(Country::Liberia),
+            ['E', s] if s >= &'M' && s <= &'O' => Ok(Country::Ukraine),
+            ['E', s] if s >= &'P' && s <= &'Q' => Ok(Country::Iran),
+            ['E', 'R'] => Ok(Country::Moldova),
+            ['E', 'S'] => Ok(Country::Estonia),
+            ['E', 'T'] => Ok(Country::Ethiopia),
+            ['E', s] if s >= &'U' && s <= &'W' => Ok(Country::Belarus),
+            ['E', 'X'] => Ok(Country::Kyrgyzstan),
+            ['E', 'Y'] => Ok(Country::Tajikistan),
+            ['E', 'Z'] => Ok(Country::Turkmenistan),
+            ['E', '2'] => Ok(Country::Thailand),
+            ['E', '3'] => Ok(Country::Eritrea),
+            ['E', '4'] => Ok(Country::PalestinianAuthority),
+            ['E', '5'] => Ok(Country::CookIslands),
+            ['E', '6'] => Ok(Country::Niue),
+            ['E', '7'] => Ok(Country::BosniaAndHerzegovina),
             ['F', _] => Ok(Country::France),
             ['G', _] => Ok(Country::UnitedKingdom),
             ['H', 'A'] => Ok(Country::Hungary),
-            ['H', 'B'] => {
-                Ok(Country::Switzerland)
-            },
+            ['H', 'B'] => Ok(Country::Switzerland),
             ['H', s] if s >= &'C' && s <= &'D' => Ok(Country::Ecuador),
-            ['H','E'] => Ok(Country::Switzerland),
-            ['H','F'] => Ok(Country::Poland),
-            ['H','G'] => Ok(Country::Hungary),
-            ['H','H'] => Ok(Country::Haiti),
-            ['H','I'] => Ok(Country::DominicanRepublic),
-            ['H',s] if s >= &'J' && s <= &'K' => Ok(Country::Colombia),
-            ['H','L'] => Ok(Country::SouthKorea),
-            ['H','M'] => Ok(Country::NorthKorea),
-            ['H','N'] => Ok(Country::Iraq),
-            ['H',s] if s >= &'O' && s <= &'P' => Ok(Country::Panama),
-            ['H',s] if s >= &'Q' && s <= &'R' => Ok(Country::Honduras),
-            ['H','S'] => Ok(Country::Thailand),
-            ['H','T'] => Ok(Country::Nicaragua),
-            ['H','U'] => Ok(Country::ElSalvador),
-            ['H','V'] => Ok(Country::VaticanCity),
-            ['H',s] if s >= &'W' && s <= &'Y' => Ok(Country::France),
-            ['H','Z'] => Ok(Country::SaudiArabia),
-            ['H','2'] => Ok(Country::Cyprus),
-            ['H','3'] => Ok(Country::Panama),
-            ['H','4'] => Ok(Country::SolomonIslands),
-            ['H',s] if s >= &'6' && s <= &'7' => Ok(Country::Nicaragua),
-            ['H',s] if s >= &'8' && s <= &'9' => Ok(Country::Panama),
+            ['H', 'E'] => Ok(Country::Switzerland),
+            ['H', 'F'] => Ok(Country::Poland),
+            ['H', 'G'] => Ok(Country::Hungary),
+            ['H', 'H'] => Ok(Country::Haiti),
+            ['H', 'I'] => Ok(Country::DominicanRepublic),
+            ['H', s] if s >= &'J' && s <= &'K' => Ok(Country::Colombia),
+            ['H', 'L'] => Ok(Country::SouthKorea),
+            ['H', 'M'] => Ok(Country::NorthKorea),
+            ['H', 'N'] => Ok(Country::Iraq),
+            ['H', s] if s >= &'O' && s <= &'P' => Ok(Country::Panama),
+            ['H', s] if s >= &'Q' && s <= &'R' => Ok(Country::Honduras),
+            ['H', 'S'] => Ok(Country::Thailand),
+            ['H', 'T'] => Ok(Country::Nicaragua),
+            ['H', 'U'] => Ok(Country::ElSalvador),
+            ['H', 'V'] => Ok(Country::VaticanCity),
+            ['H', s] if s >= &'W' && s <= &'Y' => Ok(Country::France),
+            ['H', 'Z'] => Ok(Country::SaudiArabia),
+            ['H', '2'] => Ok(Country::Cyprus),
+            ['H', '3'] => Ok(Country::Panama),
+            ['H', '4'] => Ok(Country::SolomonIslands),
+            ['H', s] if s >= &'6' && s <= &'7' => Ok(Country::Nicaragua),
+            ['H', s] if s >= &'8' && s <= &'9' => Ok(Country::Panama),
 
             ['I', _] => Ok(Country::Italy),
             ['K', _] => Ok(Country::UnitedStates),
@@ -393,10 +391,8 @@ impl CountryInfo for Call {
             ['V', s] if s >= &'T' && s <= &'W' => Ok(Country::India),
             ['V', s] if s >= &'X' && s <= &'Y' => Ok(Country::Canada),
             ['W', _] => Ok(Country::UnitedStates),
-            ['4','Z'] => Ok(Country::Israel),
-            _ => {
-                Err("unknown country prefix")
-            }
+            ['4', 'Z'] => Ok(Country::Israel),
+            _ => Err("unknown country prefix"),
         }
     }
 }
@@ -407,11 +403,11 @@ mod tests {
 
     #[test]
     fn test_name() {
-        assert_eq!(Country::Canada.name(),"Canada");
+        assert_eq!(Country::Canada.name(), "Canada");
     }
     #[test]
     fn test_countrycode() {
-        assert_eq!(Country::UnitedStates.code(),"us");
+        assert_eq!(Country::UnitedStates.code(), "us");
     }
 
     // CountryInfo trait
@@ -420,5 +416,4 @@ mod tests {
         let call = Call::new("KK4WJS");
         assert_eq!(call.country().unwrap(), Country::UnitedStates);
     }
-
 }

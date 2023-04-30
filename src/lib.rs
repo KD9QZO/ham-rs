@@ -2,21 +2,21 @@
 extern crate serde_derive;
 
 pub mod adif;
-pub mod fcc;
-pub mod countries;
-pub mod lotw;
-pub mod log;
 pub mod band;
-pub mod grid;
 pub mod call;
+pub mod countries;
+pub mod fcc;
+pub mod grid;
+pub mod log;
+pub mod lotw;
 
-pub use countries::{Country,CountryInfo};
 pub use band::Band;
-pub use grid::Grid;
 pub use call::Call;
+pub use countries::{Country, CountryInfo};
+pub use grid::Grid;
 pub use log::LogEntry;
 
-#[derive(Debug, Serialize, Deserialize,PartialEq,Clone)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
 pub enum Mode {
     DigiU,
     DigiL,
@@ -35,7 +35,7 @@ pub enum Mode {
     Sig,
     Hell,
     CW,
-    Other(String)
+    Other(String),
 }
 
 impl Mode {
@@ -61,31 +61,30 @@ impl Mode {
             "SIG" => Mode::Sig,
             "HELL" => Mode::Hell,
             "CW" => Mode::CW,
-            _ => Mode::Other(mode)
+            _ => Mode::Other(mode),
         }
     }
     pub fn mode(&self) -> String {
-        let mode_string =
-            match self {
-                Mode::DigiU => "DigiU",
-                Mode::DigiL => "DigiL",
-                Mode::USB => "USB",
-                Mode::LSB => "LSB",
-                Mode::FT8 => "FT8",
-                Mode::FT4 => "FT4",
-                Mode::JT9 => "JT9",
-                Mode::JT65 => "JT65",
-                Mode::AM => "AM",
-                Mode::FM => "FM",
-                Mode::NFM => "NFM",
-                Mode::WSPR => "WSPR",
-                Mode::PSK => "PSK",
-                Mode::Multipsk => "Multipsk",
-                Mode::Sig => "Sig",
-                Mode::Hell => "Hell",
-                Mode::CW => "CW",
-                Mode::Other(other) => other
-            };
+        let mode_string = match self {
+            Mode::DigiU => "DigiU",
+            Mode::DigiL => "DigiL",
+            Mode::USB => "USB",
+            Mode::LSB => "LSB",
+            Mode::FT8 => "FT8",
+            Mode::FT4 => "FT4",
+            Mode::JT9 => "JT9",
+            Mode::JT65 => "JT65",
+            Mode::AM => "AM",
+            Mode::FM => "FM",
+            Mode::NFM => "NFM",
+            Mode::WSPR => "WSPR",
+            Mode::PSK => "PSK",
+            Mode::Multipsk => "Multipsk",
+            Mode::Sig => "Sig",
+            Mode::Hell => "Hell",
+            Mode::CW => "CW",
+            Mode::Other(other) => other,
+        };
         mode_string.to_string()
     }
 }

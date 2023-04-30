@@ -1,10 +1,10 @@
-use serde::{Deserialize};
-use std::fmt;
-use chrono::prelude::*;
-use crate::Grid;
 use crate::lotw::LoTWStatus;
+use crate::Grid;
+use chrono::prelude::*;
+use serde::Deserialize;
+use std::fmt;
 
-#[derive(Debug,Deserialize,Serialize,Clone,PartialEq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Call {
     call: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -20,12 +20,12 @@ pub struct Call {
     #[serde(skip_serializing_if = "Option::is_none")]
     lotw: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    last_lotw_upload: Option<DateTime<Utc>>
+    last_lotw_upload: Option<DateTime<Utc>>,
 }
 
 impl Call {
     pub fn new<S: Into<String>>(call: S) -> Call {
-        Call { 
+        Call {
             call: call.into().to_uppercase(),
             op: None,
             address: None,
@@ -37,14 +37,21 @@ impl Call {
         }
     }
 
-    pub fn full(call: String, op: Option<String>, address: Option<String>, qth: Option<String>, state: Option<String>, grid: Option<Grid>, lotw: LoTWStatus) -> Call {
-        let (lotw, last_lotw_upload) =
-            match lotw {
-                LoTWStatus::Registered => (Some(true), None),
-                LoTWStatus::Unregistered => (Some(false),None),
-                LoTWStatus::LastUpload(last) => (Some(true),Some(last)),
-                LoTWStatus::Unknown => (None, None)
-            };
+    pub fn full(
+        call: String,
+        op: Option<String>,
+        address: Option<String>,
+        qth: Option<String>,
+        state: Option<String>,
+        grid: Option<Grid>,
+        lotw: LoTWStatus,
+    ) -> Call {
+        let (lotw, last_lotw_upload) = match lotw {
+            LoTWStatus::Registered => (Some(true), None),
+            LoTWStatus::Unregistered => (Some(false), None),
+            LoTWStatus::LastUpload(last) => (Some(true), Some(last)),
+            LoTWStatus::Unknown => (None, None),
+        };
         Call {
             call: call.to_uppercase(),
             op: op,
@@ -58,11 +65,9 @@ impl Call {
     }
 
     pub fn prefix(&self) -> Option<String> {
-        let index = self.call.to_string().chars().position(|c| c.is_digit(10) );
+        let index = self.call.to_string().chars().position(|c| c.is_digit(10));
         match index {
-            Some(index) => {
-                Some(self.call.to_string()[..index+1].to_string())
-            },
+            Some(index) => Some(self.call.to_string()[..index + 1].to_string()),
             None => None,
         }
     }
@@ -116,18 +121,17 @@ impl Call {
             (Some(true), Some(last)) => LoTWStatus::LastUpload(last),
             (Some(true), None) => LoTWStatus::Registered,
             (Some(false), None) => LoTWStatus::Unregistered,
-            _ => LoTWStatus::Unknown
+            _ => LoTWStatus::Unknown,
         }
     }
 
     pub fn set_lotw(&mut self, lotw: LoTWStatus) {
-        let (lotw, last_lotw_upload) =
-            match lotw {
-                LoTWStatus::Registered => (Some(true), None),
-                LoTWStatus::Unregistered => (Some(false),None),
-                LoTWStatus::LastUpload(last) => (Some(true),Some(last)),
-                LoTWStatus::Unknown => (None, None)
-            };
+        let (lotw, last_lotw_upload) = match lotw {
+            LoTWStatus::Registered => (Some(true), None),
+            LoTWStatus::Unregistered => (Some(false), None),
+            LoTWStatus::LastUpload(last) => (Some(true), Some(last)),
+            LoTWStatus::Unknown => (None, None),
+        };
         self.lotw = lotw;
         self.last_lotw_upload = last_lotw_upload;
     }

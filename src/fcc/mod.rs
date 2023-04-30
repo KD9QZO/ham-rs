@@ -1,17 +1,17 @@
-use crate::Call;
 use crate::lotw::LoTWStatus;
+use crate::Call;
 
-#[derive(Debug, Serialize, Deserialize,Clone,PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum OperatorClass {
     Tech,
     General,
     Extra,
     Novice,
     TechPlus,
-    Advanced
+    Advanced,
 }
 
-#[derive(Debug, Serialize, Deserialize,Clone,PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct FccData {
     pub class: Option<OperatorClass>,
     pub previous_class: Option<OperatorClass>,
@@ -20,7 +20,7 @@ pub struct FccData {
     pub radio_service_code: Option<String>,
     pub grant_date: Option<String>,
     pub expiration_date: Option<String>,
-    pub cancellation_date: Option<String>
+    pub cancellation_date: Option<String>,
 }
 
 impl FccData {
@@ -33,7 +33,7 @@ impl FccData {
             radio_service_code: None,
             grant_date: None,
             expiration_date: None,
-            cancellation_date: None
+            cancellation_date: None,
         }
     }
 }
@@ -82,7 +82,7 @@ pub struct Amateur {
     pub VanityRelationship: Option<String>,
     pub PreviousCallSign: Option<String>,
     pub PreviousOperatorClass: Option<char>,
-    pub TrusteeName: Option<String>
+    pub TrusteeName: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -106,23 +106,27 @@ pub trait FccInfo {
 
 impl FccInfo for Call {
     fn from_entity(entity: Entity) -> Call {
-        Call::full(entity.CallSign.to_uppercase(), 
-                   Some(entity.FullName),
-                   Some(entity.Address),
-                   Some(entity.City),
-                   Some(entity.State),
-                   None,
-                   LoTWStatus::Unknown)
+        Call::full(
+            entity.CallSign.to_uppercase(),
+            Some(entity.FullName),
+            Some(entity.Address),
+            Some(entity.City),
+            Some(entity.State),
+            None,
+            LoTWStatus::Unknown,
+        )
     }
 
     fn with_entity(&self, entity: Entity) -> Call {
-        Call::full(self.call(), 
-                   Some(entity.FullName),
-                   Some(entity.Address),
-                   Some(entity.City),
-                   Some(entity.State),
-                   self.grid().clone(),
-                   self.lotw())
+        Call::full(
+            self.call(),
+            Some(entity.FullName),
+            Some(entity.Address),
+            Some(entity.City),
+            Some(entity.State),
+            self.grid().clone(),
+            self.lotw(),
+        )
     }
 }
 

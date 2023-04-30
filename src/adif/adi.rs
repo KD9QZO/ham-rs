@@ -26,38 +26,38 @@ use super::AdifParseError;
 //
 // Special strings
 //
-const ADI_STR_EOH : &'static str = "eoh";   // end-of-header marker
-const ADI_STR_EOR : &'static str = "eor";   // end-of-record marker
+const ADI_STR_EOH: &'static str = "eoh"; // end-of-header marker
+const ADI_STR_EOR: &'static str = "eor"; // end-of-record marker
 
 //
 // We impose a maximum size for each value, primarily to ensure graceful failure
 // when given bad input.  It should be safe to increase this provided there will
 // be enough memory available to store the whole contents of the file.
 //
-const ADI_MAX_FIELDLEN : usize = 1024;
+const ADI_MAX_FIELDLEN: usize = 1024;
 
 //
 // AdiFile: represents a complete ADI file.  This structure is not compatible
 // with a streaming parser, but we're not looking to build one here.
 //
 pub struct AdiFile {
-    pub adi_header : Option<AdiHeader>,         // file header, if present
-    pub adi_records : Vec<AdiRecord>            // list of records in the file
+    pub adi_header: Option<AdiHeader>, // file header, if present
+    pub adi_records: Vec<AdiRecord>,   // list of records in the file
 }
 
 //
 // AdiHeader: represents the header in an ADI file, if present.
 //
 pub struct AdiHeader {
-    pub adih_content : Vec<u8>,                 // complete header content
-    pub adih_fields : Vec<AdiDataSpecifier>     // header data specifiers
+    pub adih_content: Vec<u8>,              // complete header content
+    pub adih_fields: Vec<AdiDataSpecifier>, // header data specifiers
 }
 
 //
 // AdiRecord: represents a record in an ADI file.
 //
 pub struct AdiRecord {
-    pub adir_fields : Vec<AdiDataSpecifier>
+    pub adir_fields: Vec<AdiDataSpecifier>,
 }
 
 //
@@ -72,11 +72,11 @@ pub struct AdiRecord {
 //
 #[derive(Debug)]
 pub struct AdiDataSpecifier {
-    pub adif_name : String,         // name of the field
-    pub adif_name_canon : String,   // canonicalized name (lowercase)
-    pub adif_length : usize,        // size in bytes of the field's value
-    pub adif_bytes : Vec<u8>,       // contents of the field's value
-    pub adif_type : Option<String>  // type specifier for the field, if provided
+    pub adif_name: String,         // name of the field
+    pub adif_name_canon: String,   // canonicalized name (lowercase)
+    pub adif_length: usize,        // size in bytes of the field's value
+    pub adif_bytes: Vec<u8>,       // contents of the field's value
+    pub adif_type: Option<String>, // type specifier for the field, if provided
 }
 
 //
@@ -87,47 +87,56 @@ pub struct AdiDataSpecifier {
 // Dump an ADI file to a string, in a format intended for debugging.
 //
 #[cfg(test)]
-pub fn adi_dump(adf : &AdiFile) -> String
-{
+pub fn adi_dump(adf: &AdiFile) -> String {
     let mut output = String::new();
 
     match adf.adi_header {
         None => output.push_str("(no header present)"),
         Some(ref adh) => {
-            output.push_str(String::from_utf8(
-                adh.adih_content.clone()).unwrap().as_str());
+            output.push_str(
+                String::from_utf8(adh.adih_content.clone())
+                    .unwrap()
+                    .as_str(),
+            );
             for field in &adh.adih_fields {
                 output.push_str(&format!("{:?}\n", field));
             }
             output.push_str("<eoh>\n");
-        },
+        }
     }
 
     for rec in &adf.adi_records {
         adi_dump_record(rec, &mut output);
     }
 
-    return output
+    return output;
 }
 
 #[cfg(test)]
-fn adi_dump_record(rec : &AdiRecord, output: &mut String)
-{
+fn adi_dump_record(rec: &AdiRecord, output: &mut String) {
     for field in &rec.adir_fields {
-        output.push_str(format!("    <{}:{}", field.adif_name_canon.as_str(),
-            field.adif_length.to_string().as_str()).as_str());
+        output.push_str(
+            format!(
+                "    <{}:{}",
+                field.adif_name_canon.as_str(),
+                field.adif_length.to_string().as_str()
+            )
+            .as_str(),
+        );
         if let Some(t) = &field.adif_type {
             output.push_str(":");
             output.push_str(t.as_str());
         }
         output.push_str(">");
-        output.push_str(String::from_utf8(
-            field.adif_bytes.clone()).unwrap().as_str());
+        output.push_str(
+            String::from_utf8(field.adif_bytes.clone())
+                .unwrap()
+                .as_str(),
+        );
         output.push_str("\n");
     }
     output.push_str("<eor>\n");
 }
-
 
 //
 // ADI Import
@@ -139,8 +148,7 @@ fn adi_dump_record(rec : &AdiRecord, output: &mut String)
 // High-level function for parsing an ADI file represented in the given string.
 //
 #[cfg(test)]
-pub fn adi_parse_string(source: &str) -> Result<AdiFile, AdifParseError>
-{
+pub fn adi_parse_string(source: &str) -> Result<AdiFile, AdifParseError> {
     let mut source_reader = Cursor::new(source);
     adi_parse(&mut source_reader)
 }
@@ -159,7 +167,7 @@ enum AdiToken {
     ADI_TOK_LAB,            // '<'
     ADI_TOK_COLON,          // ':'
     ADI_TOK_RAB,            // '>'
-    ADI_TOK_EOF             // end of file
+    ADI_TOK_EOF,            // end of file
 }
 
 //
@@ -167,8 +175,7 @@ enum AdiToken {
 // intended for use in error messages (as when one type of token was found where
 // another was expected).
 //
-fn adi_token_text(token: &AdiToken) -> String
-{
+fn adi_token_text(token: &AdiToken) -> String {
     match *token {
         AdiToken::ADI_TOK_BYTES(ref buf) => {
             //
@@ -191,14 +198,14 @@ fn adi_token_text(token: &AdiToken) -> String
                     }
                     sample_str.push_str("\"");
                     sample_str
-                },
-                Err(_) => String::from("(non-UTF8 bytes)")
+                }
+                Err(_) => String::from("(non-UTF8 bytes)"),
             }
         }
         AdiToken::ADI_TOK_LAB => String::from("\"<\""),
         AdiToken::ADI_TOK_RAB => String::from("\">\""),
         AdiToken::ADI_TOK_COLON => String::from("\":\""),
-        AdiToken::ADI_TOK_EOF => String::from("end of input")
+        AdiToken::ADI_TOK_EOF => String::from("end of input"),
     }
 }
 
@@ -206,9 +213,7 @@ fn adi_token_text(token: &AdiToken) -> String
 // Given a text token that must contain only ASCII bytes, return a String
 // representation of the token.
 //
-fn adi_token_string(token: &AdiToken, label : &str) ->
-    Result<String, AdifParseError>
-{
+fn adi_token_string(token: &AdiToken, label: &str) -> Result<String, AdifParseError> {
     if let AdiToken::ADI_TOK_BYTES(buf) = token {
         let mut i = 0;
         for &cb in buf.iter() {
@@ -223,12 +228,12 @@ fn adi_token_string(token: &AdiToken, label : &str) ->
             // consecutively, not a naked CR or LF or the reverse order, but
             // we're not validating that here.
             //
-            if !c.is_ascii() ||
-               (c.is_ascii_control() && c != '\r' && c != '\n') {
+            if !c.is_ascii() || (c.is_ascii_control() && c != '\r' && c != '\n') {
                 // TODO add byte offset
                 return Err(AdifParseError::ADIF_EBADINPUT(format!(
                     "{}: expected ASCII character, but found byte 0x{:x}",
-                    label, buf[i])));
+                    label, buf[i]
+                )));
             }
         }
 
@@ -240,18 +245,17 @@ fn adi_token_string(token: &AdiToken, label : &str) ->
         return Ok(String::from_utf8(buf.clone()).unwrap());
     } else {
         return Err(AdifParseError::ADIF_EBADINPUT(format!(
-            "{}: expected ASCII string, but found {}", label,
-            adi_token_text(token))));
+            "{}: expected ASCII string, but found {}",
+            label,
+            adi_token_text(token)
+        )));
     }
 }
 
 //
 // Low-level function that reads the next token from the underlying stream.
 //
-fn adi_import_read_token(source : &mut BufRead) ->
-    Result<AdiToken, AdifParseError>
-{
-
+fn adi_import_read_token(source: &mut BufRead) -> Result<AdiToken, AdifParseError> {
     let c = {
         let buf = source.fill_buf()?;
         if buf.len() == 0 {
@@ -286,7 +290,7 @@ fn adi_import_read_token(source : &mut BufRead) ->
     // TODO Is that a good choice?  Caller already needs to concatenate when a
     // byte sequence can contain "<", ":", or ">".
     //
-    let mut buf : Vec<u8> = Vec::new();
+    let mut buf: Vec<u8> = Vec::new();
     let mut done = false;
     while !done {
         let consumed = {
@@ -358,11 +362,11 @@ fn adi_import_read_token(source : &mut BufRead) ->
 //
 //
 struct AdiParseState<'a> {
-    aps_source : Box<BufRead + 'a>,     // underlying source of ADI input
-    aps_tokens : Vec<AdiToken>,         // next unconsumed tokens
-    aps_error : bool,                   // if true, we've encountered an error
-    aps_done : bool,                    // if true, we've read EOF
-    aps_bytes_consumed : usize          // bytes of input consumed
+    aps_source: Box<BufRead + 'a>, // underlying source of ADI input
+    aps_tokens: Vec<AdiToken>,     // next unconsumed tokens
+    aps_error: bool,               // if true, we've encountered an error
+    aps_done: bool,                // if true, we've read EOF
+    aps_bytes_consumed: usize,     // bytes of input consumed
 }
 
 //
@@ -388,9 +392,7 @@ struct AdiParseState<'a> {
 // more than N times to avoid infinite loops when code forgets to consume the
 // token.
 //
-fn adi_parse_advance_tokens(aps : &mut AdiParseState, howmany : u8) ->
-    Result<(), AdifParseError>
-{
+fn adi_parse_advance_tokens(aps: &mut AdiParseState, howmany: u8) -> Result<(), AdifParseError> {
     assert!(!aps.aps_error);
     while !aps.aps_done && (howmany as usize) > aps.aps_tokens.len() {
         let result = adi_import_read_token(&mut aps.aps_source);
@@ -403,7 +405,7 @@ fn adi_parse_advance_tokens(aps : &mut AdiParseState, howmany : u8) ->
             }
             Err(e) => {
                 aps.aps_error = true;
-                return Err(e)
+                return Err(e);
             }
         }
     }
@@ -415,8 +417,7 @@ fn adi_parse_advance_tokens(aps : &mut AdiParseState, howmany : u8) ->
 // Consume "howmany" tokens.  Note that it's illegal to consume tokens that have
 // not yet been read with adi_parse_peek_token().
 //
-fn adi_parse_consume_tokens(aps : &mut AdiParseState, howmany : u8)
-{
+fn adi_parse_consume_tokens(aps: &mut AdiParseState, howmany: u8) {
     //
     // It's illegal to try to consume tokens that haven't been read yet.
     // In order to read them, we must have loaded them into "aps_tokens".
@@ -434,7 +435,7 @@ fn adi_parse_consume_tokens(aps : &mut AdiParseState, howmany : u8)
             AdiToken::ADI_TOK_RAB => ">".len(),
             AdiToken::ADI_TOK_COLON => ":".len(),
             AdiToken::ADI_TOK_BYTES(b) => b.len(),
-            AdiToken::ADI_TOK_EOF => panic!("attempted to consume EOF")
+            AdiToken::ADI_TOK_EOF => panic!("attempted to consume EOF"),
         }
     }
 }
@@ -443,9 +444,10 @@ fn adi_parse_consume_tokens(aps : &mut AdiParseState, howmany : u8)
  * Examine the Nth token from the start of unconsumed input.  If callers process
  * this token, they should call adi_parse_consume_tokens().
  */
-fn adi_parse_peek_token<'a>(aps : &'a mut AdiParseState, which : u8) ->
-    Result<AdiToken, AdifParseError>
-{
+fn adi_parse_peek_token<'a>(
+    aps: &'a mut AdiParseState,
+    which: u8,
+) -> Result<AdiToken, AdifParseError> {
     adi_parse_advance_tokens(aps, which + 1)?;
 
     let which = which as usize;
@@ -459,52 +461,51 @@ fn adi_parse_peek_token<'a>(aps : &'a mut AdiParseState, which : u8) ->
     //
     assert!(aps.aps_done);
     assert!(aps.aps_tokens.len() > 0);
-    assert_eq!(aps.aps_tokens[aps.aps_tokens.len() - 1], AdiToken::ADI_TOK_EOF);
+    assert_eq!(
+        aps.aps_tokens[aps.aps_tokens.len() - 1],
+        AdiToken::ADI_TOK_EOF
+    );
     return Ok(aps.aps_tokens[aps.aps_tokens.len() - 1].clone());
 }
 
 //
 // General entry point for parsing an ADI file from an input source.
 //
-pub fn adi_parse(source: &mut io::Read) -> Result<AdiFile, AdifParseError>
-{
+pub fn adi_parse(source: &mut io::Read) -> Result<AdiFile, AdifParseError> {
     let mut aps = AdiParseState {
         aps_source: Box::new(BufReader::new(source)),
         aps_tokens: Vec::new(),
         aps_error: false,
         aps_done: false,
-        aps_bytes_consumed: 0
+        aps_bytes_consumed: 0,
     };
 
     let header = match adi_parse_peek_token(&mut aps, 0)? {
         AdiToken::ADI_TOK_LAB => None,
-        _ => {
-            Some(adi_parse_header(&mut aps)?)
-        }
+        _ => Some(adi_parse_header(&mut aps)?),
     };
 
     let records = adi_parse_records(&mut aps)?;
 
     Ok(AdiFile {
         adi_header: header,
-        adi_records: records
+        adi_records: records,
     })
 }
 
 //
 // Parse the header of an ADI file.
 //
-fn adi_parse_header(aps: &mut AdiParseState) -> Result<AdiHeader, AdifParseError>
-{
-    let mut header_content : Vec<u8> = Vec::new();
-    let mut header_fields : Vec<AdiDataSpecifier> = Vec::new();
+fn adi_parse_header(aps: &mut AdiParseState) -> Result<AdiHeader, AdifParseError> {
+    let mut header_content: Vec<u8> = Vec::new();
+    let mut header_fields: Vec<AdiDataSpecifier> = Vec::new();
 
     loop {
         match adi_parse_peek_token(aps, 0)? {
             AdiToken::ADI_TOK_BYTES(b) => {
                 header_content.extend(b);
                 adi_parse_consume_tokens(aps, 1);
-            },
+            }
 
             //
             // Although it seems crazy, the ADIF specification does not say
@@ -516,11 +517,11 @@ fn adi_parse_header(aps: &mut AdiParseState) -> Result<AdiHeader, AdifParseError
             AdiToken::ADI_TOK_COLON => {
                 header_content.push(':' as u8);
                 adi_parse_consume_tokens(aps, 1);
-            },
+            }
             AdiToken::ADI_TOK_RAB => {
                 header_content.push('>' as u8);
                 adi_parse_consume_tokens(aps, 1);
-            },
+            }
 
             AdiToken::ADI_TOK_LAB => {
                 let next = adi_parse_peek_token(aps, 1)?;
@@ -547,18 +548,19 @@ fn adi_parse_header(aps: &mut AdiParseState) -> Result<AdiHeader, AdifParseError
                 //
                 let spec = adi_parse_data_specifier(aps)?;
                 header_fields.push(spec);
-            },
+            }
 
             AdiToken::ADI_TOK_EOF => {
                 return Err(AdifParseError::ADIF_EBADINPUT(
-                    "unexpected end of input while reading header".to_string()));
+                    "unexpected end of input while reading header".to_string(),
+                ));
             }
         }
     }
 
     Ok(AdiHeader {
         adih_content: header_content,
-        adih_fields: header_fields
+        adih_fields: header_fields,
     })
 }
 
@@ -584,15 +586,13 @@ fn adi_parse_header(aps: &mut AdiParseState) -> Result<AdiHeader, AdifParseError
 // directly after the field length.  We do not yet support this, so we only
 // handle the sequence above.
 //
-fn adi_parse_data_specifier(aps : &mut AdiParseState) ->
-    Result<AdiDataSpecifier, AdifParseError>
-{
+fn adi_parse_data_specifier(aps: &mut AdiParseState) -> Result<AdiDataSpecifier, AdifParseError> {
     assert_eq!(adi_parse_peek_token(aps, 0).unwrap(), AdiToken::ADI_TOK_LAB);
 
-    let t_fieldname   = adi_parse_peek_token(aps, 1)?;
-    let t_colon       = adi_parse_peek_token(aps, 2)?;
+    let t_fieldname = adi_parse_peek_token(aps, 1)?;
+    let t_colon = adi_parse_peek_token(aps, 2)?;
     let t_fieldlength = adi_parse_peek_token(aps, 3)?;
-    let t_rab         = adi_parse_peek_token(aps, 4)?;
+    let t_rab = adi_parse_peek_token(aps, 4)?;
 
     let fieldname = adi_token_string(&t_fieldname, "parsing data specifier")?;
     match t_colon {
@@ -603,13 +603,18 @@ fn adi_parse_data_specifier(aps : &mut AdiParseState) ->
                 but found {}",
                 aps.aps_bytes_consumed,
                 adi_token_text(&AdiToken::ADI_TOK_COLON),
-                adi_token_text(&t_colon))));
+                adi_token_text(&t_colon)
+            )));
         }
     };
 
-    let fieldlength_str = adi_token_string(&t_fieldlength,
-        &format!("parsing data specifier (near byte {}) length",
-        aps.aps_bytes_consumed))?;
+    let fieldlength_str = adi_token_string(
+        &t_fieldlength,
+        &format!(
+            "parsing data specifier (near byte {}) length",
+            aps.aps_bytes_consumed
+        ),
+    )?;
     let fieldlength_result = fieldlength_str.parse::<usize>();
     let fieldlength = match fieldlength_result {
         Ok(n) if n <= ADI_MAX_FIELDLEN => n,
@@ -622,13 +627,14 @@ fn adi_parse_data_specifier(aps : &mut AdiParseState) ->
             return Err(AdifParseError::ADIF_EBADINPUT(format!(
                 "parsing data specifier (near byte {}): \
                 max supported size is {} bytes",
-                aps.aps_bytes_consumed,
-                ADI_MAX_FIELDLEN)));
+                aps.aps_bytes_consumed, ADI_MAX_FIELDLEN
+            )));
         }
         Err(s) => {
             return Err(AdifParseError::ADIF_EBADINPUT(format!(
                 "parsing data specifier (near byte {}) length: {}",
-                aps.aps_bytes_consumed, s)));
+                aps.aps_bytes_consumed, s
+            )));
         }
     };
 
@@ -638,14 +644,18 @@ fn adi_parse_data_specifier(aps : &mut AdiParseState) ->
             // TODO
             return Err(AdifParseError::ADIF_ENOT_YET_IMPLEMENTED(format!(
                 "parsing data specifier (near byte {}): \
-                typed values are not supported", aps.aps_bytes_consumed)));
-        },
+                typed values are not supported",
+                aps.aps_bytes_consumed
+            )));
+        }
         _ => {
             return Err(AdifParseError::ADIF_EBADINPUT(format!(
                 "parsing data specifier (near byte {}): \
-                expected {}, but found {}", aps.aps_bytes_consumed,
+                expected {}, but found {}",
+                aps.aps_bytes_consumed,
                 adi_token_text(&AdiToken::ADI_TOK_RAB),
-                adi_token_text(&t_rab))));
+                adi_token_text(&t_rab)
+            )));
         }
     };
 
@@ -654,7 +664,7 @@ fn adi_parse_data_specifier(aps : &mut AdiParseState) ->
     // contains at least the entire string that we care about.
     //
     adi_parse_consume_tokens(aps, 5);
-    let mut fieldvalue : Vec<u8> = Vec::with_capacity(fieldlength);
+    let mut fieldvalue: Vec<u8> = Vec::with_capacity(fieldlength);
     while fieldlength > fieldvalue.len() {
         let t_value = adi_parse_peek_token(aps, 0)?;
         adi_parse_consume_tokens(aps, 1);
@@ -675,8 +685,10 @@ fn adi_parse_data_specifier(aps : &mut AdiParseState) ->
             AdiToken::ADI_TOK_EOF => {
                 return Err(AdifParseError::ADIF_EBADINPUT(format!(
                     "parsing data specifier (near byte {}): \
-                    unexpected {} in value", aps.aps_bytes_consumed,
-                    adi_token_text(&AdiToken::ADI_TOK_EOF))));
+                    unexpected {} in value",
+                    aps.aps_bytes_consumed,
+                    adi_token_text(&AdiToken::ADI_TOK_EOF)
+                )));
             }
         }
     }
@@ -694,17 +706,15 @@ fn adi_parse_data_specifier(aps : &mut AdiParseState) ->
         adif_name: fieldname.to_string(), // TODO extra copy?
         adif_length: fieldlength,
         adif_bytes: fieldvalue,
-        adif_type: None
+        adif_type: None,
     })
 }
 
 //
 // Parse the body of the ADI input (i.e., everything after the header).
 //
-fn adi_parse_records(aps: &mut AdiParseState) ->
-    Result<Vec<AdiRecord>, AdifParseError>
-{
-    let mut records : Vec<AdiRecord> = Vec::new();
+fn adi_parse_records(aps: &mut AdiParseState) -> Result<Vec<AdiRecord>, AdifParseError> {
+    let mut records: Vec<AdiRecord> = Vec::new();
 
     adi_parse_consume_until_lab(aps)?;
 
@@ -712,7 +722,7 @@ fn adi_parse_records(aps: &mut AdiParseState) ->
         match adi_parse_peek_token(aps, 0)? {
             AdiToken::ADI_TOK_EOF => {
                 break;
-            },
+            }
             _ => {
                 records.push(adi_parse_record(aps)?);
             }
@@ -725,11 +735,9 @@ fn adi_parse_records(aps: &mut AdiParseState) ->
 //
 // Parse a single record from the ADI file, including any trailing bytes.
 //
-fn adi_parse_record(aps: &mut AdiParseState) ->
-    Result<AdiRecord, AdifParseError>
-{
+fn adi_parse_record(aps: &mut AdiParseState) -> Result<AdiRecord, AdifParseError> {
     let mut record = AdiRecord {
-        adir_fields: vec![]
+        adir_fields: vec![],
     };
 
     loop {
@@ -738,10 +746,9 @@ fn adi_parse_record(aps: &mut AdiParseState) ->
         let t_indicator = adi_parse_peek_token(aps, 2)?;
 
         match (t_lab, t_fieldname, t_indicator) {
-            (AdiToken::ADI_TOK_LAB,
-            AdiToken::ADI_TOK_BYTES(ref s),
-            AdiToken::ADI_TOK_RAB) if adifutil::byteseq_equal_ci(
-            s, ADI_STR_EOR) => {
+            (AdiToken::ADI_TOK_LAB, AdiToken::ADI_TOK_BYTES(ref s), AdiToken::ADI_TOK_RAB)
+                if adifutil::byteseq_equal_ci(s, ADI_STR_EOR) =>
+            {
                 adi_parse_consume_tokens(aps, 3);
                 adi_parse_consume_until_lab(aps)?;
                 break;
@@ -760,15 +767,13 @@ fn adi_parse_record(aps: &mut AdiParseState) ->
 // useful because ADI allows any data specifier to contain arbitrary bytes after
 // the value and before the next data specifier or "<eor>" indicator.
 //
-fn adi_parse_consume_until_lab(aps: &mut AdiParseState) ->
-    Result<(), AdifParseError>
-{
+fn adi_parse_consume_until_lab(aps: &mut AdiParseState) -> Result<(), AdifParseError> {
     loop {
         let t_next = adi_parse_peek_token(aps, 0)?;
         match t_next {
             AdiToken::ADI_TOK_LAB => break,
             AdiToken::ADI_TOK_EOF => break,
-            _ => adi_parse_consume_tokens(aps, 1)
+            _ => adi_parse_consume_tokens(aps, 1),
         }
     }
 
@@ -781,46 +786,45 @@ fn adi_parse_consume_until_lab(aps: &mut AdiParseState) ->
 //
 #[cfg(test)]
 mod test {
-    use std::io;
-    use super::AdifParseError;
     use super::AdiToken;
+    use super::AdifParseError;
+    use std::io;
 
     fn make_file_basic() -> super::AdiFile {
         let header = None;
         let records = vec![];
         return super::AdiFile {
             adi_header: header,
-            adi_records: records
-        }
+            adi_records: records,
+        };
     }
 
     fn make_file_header() -> super::AdiFile {
-        let headerstr = String::from(
-            "This is a test file!\n").as_bytes().to_vec();
+        let headerstr = String::from("This is a test file!\n").as_bytes().to_vec();
         let header = super::AdiHeader {
             adih_content: headerstr,
-            adih_fields: vec![]
+            adih_fields: vec![],
         };
         let records = vec![];
         return super::AdiFile {
             adi_header: Some(header),
-            adi_records: records
-        }
+            adi_records: records,
+        };
     }
 
     fn make_file_complex() -> super::AdiFile {
-        let headerstr = String::from(
-            r#"This is a string.<adif_VERSion:3>1.0\nMore content"#).
-            as_bytes().to_vec();
+        let headerstr = String::from(r#"This is a string.<adif_VERSion:3>1.0\nMore content"#)
+            .as_bytes()
+            .to_vec();
         let header = super::AdiHeader {
             adih_content: headerstr,
-            adih_fields: vec![ super::AdiDataSpecifier {
+            adih_fields: vec![super::AdiDataSpecifier {
                 adif_name: String::from("adif_VERSion"),
                 adif_name_canon: String::from("adif_version"),
                 adif_length: 3,
                 adif_bytes: String::from("1.0").as_bytes().to_vec(),
-                adif_type: None
-            } ]
+                adif_type: None,
+            }],
         };
         let records = vec![
             super::AdiRecord {
@@ -830,17 +834,16 @@ mod test {
                         adif_name_canon: String::from("call"),
                         adif_length: 6,
                         adif_bytes: String::from("KK6ZBI").as_bytes().to_vec(),
-                        adif_type: None
+                        adif_type: None,
                     },
-
                     super::AdiDataSpecifier {
                         adif_name: String::from("QSO_date"),
                         adif_name_canon: String::from("qso_date"),
                         adif_length: 8,
                         adif_bytes: String::from("20181129").as_bytes().to_vec(),
-                        adif_type: None
-                    }
-                ]
+                        adif_type: None,
+                    },
+                ],
             },
             super::AdiRecord {
                 adir_fields: vec![
@@ -849,66 +852,64 @@ mod test {
                         adif_name_canon: String::from("call"),
                         adif_length: 6,
                         adif_bytes: String::from("KB1HCN").as_bytes().to_vec(),
-                        adif_type: Some(String::from("S"))
+                        adif_type: Some(String::from("S")),
                     },
-
                     super::AdiDataSpecifier {
                         adif_name: String::from("QSO_date"),
                         adif_name_canon: String::from("qso_date"),
                         adif_length: 8,
                         adif_bytes: String::from("20181130").as_bytes().to_vec(),
-                        adif_type: None
-                    }
-                ]
-            }
+                        adif_type: None,
+                    },
+                ],
+            },
         ];
         return super::AdiFile {
             adi_header: Some(header),
-            adi_records: records
-        }
+            adi_records: records,
+        };
     }
 
-    fn import_test(input : &str) {
+    fn import_test(input: &str) {
         println!("\n\ntokenizing string:\n{}\n\n", input);
-    
+
         let source = io::Cursor::new(input);
         let mut buffered = io::BufReader::new(source);
         let mut maxiters = 100;
-    
+
         loop {
             if maxiters == 0 {
                 panic!("bailing out after max tokens reached!");
             }
             maxiters -= 1;
-    
+
             let rtoken = super::adi_import_read_token(&mut buffered);
             match rtoken {
                 Err(AdifParseError::ADIF_EIO(ioe)) => {
                     println!("unexpected I/O error: {}", ioe);
                     return;
-                },
+                }
                 Err(AdifParseError::ADIF_EBADINPUT(msg)) => {
                     println!("bad input: {}", msg);
                     return;
-                },
+                }
                 Err(AdifParseError::ADIF_ENOT_YET_IMPLEMENTED(msg)) => {
                     println!("not yet implemented: {}", msg);
                     return;
-                },
-    
+                }
+
                 Ok(AdiToken::ADI_TOK_LAB) => {
                     println!("token: '<'");
-                },
+                }
                 Ok(AdiToken::ADI_TOK_RAB) => {
                     println!("token: '>'");
-                },
+                }
                 Ok(AdiToken::ADI_TOK_COLON) => {
                     println!("token: ':'");
-                },
+                }
                 Ok(AdiToken::ADI_TOK_BYTES(buf)) => {
-                     println!("token: raw bytes: {}",
-                        String::from_utf8(buf).unwrap());
-                },
+                    println!("token: raw bytes: {}", String::from_utf8(buf).unwrap());
+                }
                 Ok(AdiToken::ADI_TOK_EOF) => {
                     println!("token: EOF");
                     return;
@@ -925,12 +926,14 @@ mod test {
         println!("{}", super::adi_dump(&adf));
         let adf = make_file_complex();
         println!("{}", super::adi_dump(&adf));
-        import_test(r#"
+        import_test(
+            r#"
             header stuff here<eoh>
             <call:6>KK6ZBI
             <bupkis:3>123
             <eor>
-        "#);
+        "#,
+        );
 
         println!("\n\nparse tests\n");
         parse_test_string(r"foobar");
@@ -940,27 +943,29 @@ mod test {
         parse_test_string(r"foobar<eoh:3>789");
         parse_test_string(r"foobar<foo:3>123<eoh>");
         parse_test_string(r"preamble<foo:3>12345<bar:7>123456789<eoh>");
-        parse_test_string(r"preamble<foo:3>12345<bar:7>123456789<eoh>
+        parse_test_string(
+            r"preamble<foo:3>12345<bar:7>123456789<eoh>
             <call:6>kk6zbi
             <junk:3>123456
             <eor>
             <call:6>kb1hcn
             <junk:7>123456789:0
-            <eor>");
+            <eor>",
+        );
 
         // XXX test something
     }
 
-    fn parse_test_string(s : &str) {
+    fn parse_test_string(s: &str) {
         println!("test input:\n{}\n", s);
         test_print(super::adi_parse_string(s));
     }
 
-    fn test_print(r : Result<super::AdiFile, super::AdifParseError>) {
+    fn test_print(r: Result<super::AdiFile, super::AdifParseError>) {
         match r {
             Err(e) => {
                 println!("error:\n{:?}", e);
-            },
+            }
             Ok(adf) => {
                 println!("success:\n{}", super::adi_dump(&adf));
             }
